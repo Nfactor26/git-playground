@@ -14,6 +14,7 @@ using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.NUnit.NUnitTasks;
 
 [CheckBuildProjectConfigurations]
 [ShutdownDotNetAfterServerBuild]
@@ -37,6 +38,7 @@ class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath OutputDirectory => RootDirectory / "output" / Configuration;
+    AbsolutePath TestResultsDirectory => RootDirectory / "testresult" / Configuration;
 
     Target Clean => _ => _
         .Before(Restore)
@@ -45,6 +47,7 @@ class Build : NukeBuild
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             EnsureCleanDirectory(OutputDirectory);
+            EnsureCleanDirectory(TestResultsDirectory);
         });
 
     Target Restore => _ => _
@@ -61,11 +64,23 @@ class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetOutputDirectory(OutputDirectory)
                 //.SetAssemblyVersion(GitVersion.AssemblySemVer)
                 //.SetFileVersion(GitVersion.AssemblySemFileVer)
                 //.SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore());
+        });        
+
+    Target Test => _ => _
+        .TriggeredBy(Compile)
+        .Executes(() =>
+        {
+            Logger.Info("Starting Test Execution");
+            DotNetTest(t => t
+            .SetProjectFile(Solution)
+            .SetConfiguration(Configuration).EnableNoRestore()
+            .EnableNoBuild()
+            .SetResultsDirectory(TestResultsDirectory)
+            .SetLogger("trx;logfilename=testresult.trx"));
         });
 
 }
