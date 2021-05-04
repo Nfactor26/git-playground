@@ -6,6 +6,10 @@
     <RootNamespace>git_playground</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\output\Simulator\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Ninject" Version="3.3.4" />
   </ItemGroup>
