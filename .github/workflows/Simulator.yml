@@ -63,7 +63,7 @@ jobs:
 
     # Execute all unit tests in the solution
     - name: Build Project
-      run: build --skip test
+      run: .\build.cmd --skip test
   
     # Upload the build output 
     - name: Upload build artifacts
