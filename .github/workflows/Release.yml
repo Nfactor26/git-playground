@@ -65,6 +65,7 @@ jobs:
         versionSpec: '5.x'
 
     - name: Determine version and display config
+      id: gitversion
       uses: gittools/actions/gitversion/execute@v0.9.7
       with:
         useConfigFile: true
