@@ -1,0 +1,124 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# This workflow will build, test, sign and package a WPF or Windows Forms desktop application
+# built on .NET Core.
+# To learn how to migrate your existing application to .NET Core,
+# refer to https://docs.microsoft.com/en-us/dotnet/desktop-wpf/migration/convert-project-from-net-framework
+#
+# To configure this workflow:
+#
+# 1. Configure environment variables
+# GitHub sets default environment variables for every workflow run.
+# Replace the variables relative to your project in the "env" section below.
+#
+# 2. Signing
+# Generate a signing certificate in the Windows Application
+# Packaging Project or add an existing signing certificate to the project.
+# Next, use PowerShell to encode the .pfx file using Base64 encoding
+# by running the following Powershell script to generate the output string:
+#
+# $pfx_cert = Get-Content '.\SigningCertificate.pfx' -Encoding Byte
+# [System.Convert]::ToBase64String($pfx_cert) | Out-File 'SigningCertificate_Encoded.txt'
+#
+# Open the output file, SigningCertificate_Encoded.txt, and copy the
+# string inside. Then, add the string to the repo as a GitHub secret
+# and name it "Base64_Encoded_Pfx."
+# For more information on how to configure your signing certificate for
+# this workflow, refer to https://github.com/microsoft/github-actions-for-desktop-apps#signing
+#
+# Finally, add the signing certificate password to the repo as a secret and name it "Pfx_Key".
+# See "Build the Windows Application Packaging project" below to see how the secret is used.
+#
+# For more information on GitHub Actions, refer to https://github.com/features/actions
+# For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
+# refer to https://github.com/microsoft/github-actions-for-desktop-apps
+
+name: .NET Core Desktop
+
+on:
+  push:    
+    tags:        
+      - v*
+
+jobs:
+
+  build:
+   runs-on: ${{ matrix.os }}
+   strategy:
+      matrix:
+        os: [windows-latest]
+        dotnet-version: [ '6.0.x' ]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+  
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'
+
+    - name: Determine version and display config
+      uses: gittools/actions/gitversion/execute@v0.9.7
+      with:
+        useConfigFile: false
+        additionalArguments: '/showConfig'
+
+    - name: Display GitVersion outputs
+      run: |
+        echo "Major: ${{ steps.gitversion.outputs.major }}"
+        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
+        echo "PreReleaseTag: ${{ steps.gitversion.outputs.preReleaseTag }}"
+        echo "PreReleaseTagWithDash: ${{ steps.gitversion.outputs.preReleaseTagWithDash }}"
+        echo "PreReleaseLabel: ${{ steps.gitversion.outputs.preReleaseLabel }}"
+        echo "PreReleaseNumber: ${{ steps.gitversion.outputs.preReleaseNumber }}"
+        echo "WeightedPreReleaseNumber: ${{ steps.gitversion.outputs.weightedPreReleaseNumber }}"
+        echo "BuildMetaData: ${{ steps.gitversion.outputs.buildMetaData }}"
+        echo "BuildMetaDataPadded: ${{ steps.gitversion.outputs.buildMetaDataPadded }}"
+        echo "FullBuildMetaData: ${{ steps.gitversion.outputs.fullBuildMetaData }}"
+        echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+        echo "LegacySemVer: ${{ steps.gitversion.outputs.legacySemVer }}"
+        echo "LegacySemVerPadded: ${{ steps.gitversion.outputs.legacySemVerPadded }}"
+        echo "AssemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
+        echo "AssemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
+        echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+        echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
+        echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
+        echo "EscapedBranchName: ${{ steps.gitversion.outputs.escapedBranchName }}"
+        echo "Sha: ${{ steps.gitversion.outputs.sha }}"
+        echo "ShortSha: ${{ steps.gitversion.outputs.shortSha }}"
+        echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
+        echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
+        echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
+        echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
+        echo "VersionSourceSha: ${{ steps.gitversion.outputs.versionSourceSha }}"
+        echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.commitsSinceVersionSource }}"
+        echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
+        echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
+        echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
+    
+    # Execute all unit tests in the solution
+    - name: Build Project
+      run: dotnet build -c Release -o app/publish
+  
+    # Upload the build output 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Simulator
+        path: output\simulator    
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: simulator-${{ matrix.os }}
+        path: app/publish       
+        
+    
