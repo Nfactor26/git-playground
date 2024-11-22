@@ -105,7 +105,13 @@ jobs:
         echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
         echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
         echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
-    
+
+    - name: Update assembly version  
+      uses: vers-one/dotnet-project-version-updater@v1.7
+      with:
+        file: "*.csproj"
+        version: ${{ steps.gitversion.outputs.semVer }}
+
     # Execute all unit tests in the solution
     - name: Build Project
       run: dotnet build -c Release -o app/publish

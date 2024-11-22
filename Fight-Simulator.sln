@@ -21,7 +21,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{9BFB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{5853A2EB-890B-4EA7-82E6-BE0814779898}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\github-container-registry.yml = .github\workflows\github-container-registry.yml
 		.github\workflows\inputs-and-conditions.yml = .github\workflows\inputs-and-conditions.yml
+		.github\workflows\Release.yml = .github\workflows\Release.yml
+		.github\workflows\secrets.yaml = .github\workflows\secrets.yaml
 		.github\workflows\Simulator.yml = .github\workflows\Simulator.yml
 	EndProjectSection
 EndProject
