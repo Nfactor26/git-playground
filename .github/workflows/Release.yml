@@ -64,7 +64,7 @@ jobs:
       with:
         versionSpec: '6.x'
 
-    - name: Determine version and display config    
+    - name: Determine Version
       uses: gittools/actions/gitversion/execute@v3.0.3
      
     - name: Display GitVersion outputs
